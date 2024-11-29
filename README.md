@@ -10,8 +10,8 @@ By following the above steps we can configure and run the Frontend.
 
 ## Recommended Improvements
 
-    1: Need to add the test cases due to the lack of the time I did not implement the test cases.
-    3: User feed back on exception needs to be added to make user experience better.
+    1: Need to add the test.
+    2: May be search can be a good featre as well
 
 ## Things That Were Not Tested
 
