@@ -7,6 +7,7 @@ import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { BookService } from '../../services/book.service';
 import { Book } from '../../models/book';
 import { BookFormComponent } from '../book-form/book-form.component';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-book-list',
@@ -19,23 +20,34 @@ import { BookFormComponent } from '../book-form/book-form.component';
     MatDialogModule,
   ],
   templateUrl: './book-list.component.html',
-  styleUrls: ['./book-list.component.scss'],
 })
 export class BookListComponent implements OnInit {
   books: Book[] = [];
+  isLoading = false;
   displayedColumns: string[] = ['title', 'author', 'price', 'actions'];
 
-  constructor(private bookService: BookService, private dialog: MatDialog) {}
+  constructor(
+    private bookService: BookService,
+    private dialog: MatDialog,
+    private snackBar: MatSnackBar
+  ) {}
 
   ngOnInit(): void {
     this.loadBooks();
   }
 
   loadBooks(): void {
-    this.bookService.getBooks().subscribe(
-      (books) => (this.books = books),
-      (error) => console.error('Error fetching books:', error)
-    );
+    this.isLoading = true;
+    this.bookService.getBooks().subscribe({
+      next: (data: Book[]) => {
+        this.books = data;
+        this.isLoading = false;
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.dissplayMsg('Internal server error.');
+      },
+    });
   }
 
   openBookForm(book?: Book): void {
@@ -47,14 +59,31 @@ export class BookListComponent implements OnInit {
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         if (result.id) {
+          this.isLoading = true;
           this.bookService.updateBook(result.id, result).subscribe(
-            () => this.loadBooks(),
-            (error) => console.error('Error updating book:', error)
+            () => {
+              this.dissplayMsg('Book updated successfully.');
+              this.isLoading = false;
+              this.loadBooks();
+            },
+            (error) => {
+              console.error('Error updating book:', error);
+              this.dissplayMsg('Error updating book.');
+              this.isLoading = false;
+            }
           );
         } else {
           this.bookService.addBook(result).subscribe(
-            () => this.loadBooks(),
-            (error) => console.error('Error adding book:', error)
+            () => {
+              this.isLoading = false;
+              this.dissplayMsg('Book added successfully.');
+              this.loadBooks();
+            },
+            (error) => {
+              console.error('Error adding book:', error);
+              this.dissplayMsg('Unable to add the book.');
+              this.isLoading = false;
+            }
           );
         }
       }
@@ -64,9 +93,23 @@ export class BookListComponent implements OnInit {
   deleteBook(id: string): void {
     if (confirm('Are you sure you want to delete this book?')) {
       this.bookService.deleteBook(id).subscribe(
-        () => this.loadBooks(),
-        (error) => console.error('Error deleting book:', error)
+        () => {
+          this.loadBooks();
+          this.dissplayMsg('Book deleted successfully.');
+        },
+        (error) => {
+          console.error('Error deleting book:', error);
+          this.dissplayMsg('Unable to delete the book.');
+        }
       );
     }
+  }
+
+  dissplayMsg(message: string): void {
+    this.snackBar.open(message, 'Close', {
+      duration: 5000,
+      horizontalPosition: 'right',
+      verticalPosition: 'top',
+    });
   }
 }

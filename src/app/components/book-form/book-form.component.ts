@@ -12,6 +12,7 @@ import {
   MatDialogModule,
 } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { Book } from '../../models/book';
@@ -28,13 +29,13 @@ import { Book } from '../../models/book';
     MatButtonModule,
   ],
   templateUrl: './book-form.component.html',
-  styleUrls: ['./book-form.component.scss'],
 })
 export class BookFormComponent {
   bookForm: FormGroup;
 
   constructor(
     private fb: FormBuilder,
+    private snackBar: MatSnackBar,
     public dialogRef: MatDialogRef<BookFormComponent>,
     @Inject(MAT_DIALOG_DATA) public data: Book
   ) {
@@ -48,7 +49,22 @@ export class BookFormComponent {
 
   onSubmit(): void {
     if (this.bookForm.valid) {
-      this.dialogRef.close(this.bookForm.value);
+      const result = this.dialogRef.close(this.bookForm.value);
+      const isSuccess = result !== undefined;
+      if (isSuccess) {
+        this.snackBar.open('Book saved successfully!', 'Close', {
+          duration: 3000,
+        });
+        this.dialogRef.close(this.bookForm.value); // Pass form data back to parent
+      } else {
+        this.snackBar.open(
+          'Failed to save the book. Please try again.',
+          'Close',
+          {
+            duration: 3000,
+          }
+        );
+      }
     }
   }
 
