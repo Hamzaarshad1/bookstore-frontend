@@ -14,12 +14,12 @@ export class BookService {
   getBooks(
     page: number = 1,
     pageSize: number = 5
-  ): Observable<{ books: Book[]; totalCount: number }> {
+  ): Observable<{ books: Book[]; totalBooks: number }> {
     let params = new HttpParams()
-      .set('page', page.toString())
+      .set('pageNumber', page.toString())
       .set('pageSize', pageSize.toString());
 
-    return this.http.get<{ books: Book[]; totalCount: number }>(this.apiUrl, {
+    return this.http.get<{ books: Book[]; totalBooks: number }>(this.apiUrl, {
       params,
     });
   }

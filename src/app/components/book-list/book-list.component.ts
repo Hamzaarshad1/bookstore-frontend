@@ -50,7 +50,7 @@ export class BookListComponent implements OnInit {
     this.bookService.getBooks(this.currentPage, this.pageSize).subscribe(
       (response) => {
         this.books = response.books;
-        this.totalBooks = response.totalCount;
+        this.totalBooks = response.totalBooks;
         this.isLoading = false;
       },
       (error) => {
@@ -117,6 +117,7 @@ export class BookListComponent implements OnInit {
   }
 
   onPageChange(event: PageEvent): void {
+    console.log(event);
     this.currentPage = event.pageIndex + 1;
     this.pageSize = event.pageSize;
     this.loadBooks();
