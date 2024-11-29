@@ -1,13 +1,15 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule } from '@angular/material/table';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
+import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { BookService } from '../../services/book.service';
 import { Book } from '../../models/book';
 import { BookFormComponent } from '../book-form/book-form.component';
-import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-book-list',
@@ -15,9 +17,12 @@ import { MatSnackBar } from '@angular/material/snack-bar';
   imports: [
     CommonModule,
     MatTableModule,
+    MatPaginatorModule,
     MatButtonModule,
     MatIconModule,
     MatDialogModule,
+    MatSnackBarModule,
+    MatProgressSpinnerModule,
   ],
   templateUrl: './book-list.component.html',
 })
@@ -25,6 +30,10 @@ export class BookListComponent implements OnInit {
   books: Book[] = [];
   isLoading = false;
   displayedColumns: string[] = ['title', 'author', 'price', 'actions'];
+  totalBooks: number = 0;
+  pageSize: number = 5;
+  pageSizeOptions: number[] = [5, 10, 25];
+  currentPage: number = 1;
 
   constructor(
     private bookService: BookService,
@@ -38,16 +47,18 @@ export class BookListComponent implements OnInit {
 
   loadBooks(): void {
     this.isLoading = true;
-    this.bookService.getBooks().subscribe({
-      next: (data: Book[]) => {
-        this.books = data;
+    this.bookService.getBooks(this.currentPage, this.pageSize).subscribe(
+      (response) => {
+        this.books = response.books;
+        this.totalBooks = response.totalCount;
         this.isLoading = false;
       },
-      error: (err) => {
-        this.isLoading = false;
+      (error) => {
+        console.error('Error fetching books:', error);
         this.dissplayMsg('Internal server error.');
-      },
-    });
+        this.isLoading = false;
+      }
+    );
   }
 
   openBookForm(book?: Book): void {
@@ -103,6 +114,12 @@ export class BookListComponent implements OnInit {
         }
       );
     }
+  }
+
+  onPageChange(event: PageEvent): void {
+    this.currentPage = event.pageIndex + 1;
+    this.pageSize = event.pageSize;
+    this.loadBooks();
   }
 
   dissplayMsg(message: string): void {
