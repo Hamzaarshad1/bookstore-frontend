@@ -24,3 +24,17 @@ Deploying the backend application on AWS can be accomplished using the following
 _ Set up a CI/CD pipeline using GitHub Actions to automate deployments.
 _ Configure AWS credentials and deployment scripts in the GitHub Actions workflow file.
 2: Manual Deployment: \* Package the application and upload it to S3 and cloud front and rout 53 can be configured.
+
+### UI
+
+Home page
+
+![alt text](image.png)
+
+Update book
+
+![alt text](image-1.png)
+
+Add new book
+
+![alt text](image-2.png)
